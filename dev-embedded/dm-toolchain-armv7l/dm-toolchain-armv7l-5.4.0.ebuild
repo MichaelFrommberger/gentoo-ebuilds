@@ -29,7 +29,7 @@ src_unpack() {
 }
 
 src_prepare() {
-	# replace download path with distfiles and makde it writable
+	# replace download path with distfiles and made it writable
 	sed -i -e "s:.*CT_LOCAL_TARBALLS_DIR=.*:CT_LOCAL_TARBALLS_DIR=\"${PORTDIR}/distfiles\":" ${S}/.config || die
 	addwrite ${PORTDIR}/distfiles
 
