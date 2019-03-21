@@ -1,0 +1,291 @@
+--- keys/hab4_pki_tree.sh	2018-03-16 14:21:25.342675001 +0100
++++ keys/hab4_pki_tree_patched.sh	2018-03-16 14:54:39.525667394 +0100
+@@ -42,6 +42,41 @@
+ #
+ #-----------------------------------------------------------------------------
+ 
++usage="$(basename "$0") [-h] -k <Key_path>
++	Generate a signed u-boot image (secure boot based on the HAB).
++where:
++    -h  show this help text
++    -k  Path to the file key_pass.txt
++    "
++KEY_PASS="./key_pass.txt"
++
++while getopts ':hk:' varname; do
++  case "$varname" in
++    h) echo "$usage"
++       exit
++       ;;
++    k) KEY_PASS=${OPTARG}
++       if [ ! -f "${KEY_PASS}" ]
++            then
++            echo "key_pass.txt was not found!!"
++            echo "Please create one!!"
++            exit
++       fi
++       ;;
++    :) printf "\x1b[31m Error: missing argument for -%s \x1b[0m \n" "$OPTARG" >&2
++       echo "-----"
++       echo "$usage" >&2
++       exit 1
++       ;;
++   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
++       echo "$usage" >&2
++       exit 1
++       ;;
++  esac
++done
++shift "$((OPTIND - 1))"
++
++
+ printf "\n"
+ printf "    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+ printf "    This script is a part of the Code signing tools for Freescale's\n"
+@@ -139,12 +174,12 @@
+     echo "A default 'serial' file was created!"
+ fi
+ 
+-# Check that the file "key_pass.txt" is present, if not create it with default user/pwd:
+-if [ ! -f key_pass.txt ]
++# Check that the file "./key_pass.txt" is present, if not create it with default user/pwd:
++if [ ! -f ${KEY_PASS} ]
+ then
+-    echo "test" > key_pass.txt
+-    echo "test" >> key_pass.txt
+-    echo "A default file 'key_pass.txt' was created with password = test!"
++    echo "test" > ${KEY_PASS}
++    echo "test" >> ${KEY_PASS}
++    echo "A default file '${KEY_PASS}' was created with password = test!"
+ fi
+ 
+ # The following is required otherwise OpenSSL complains
+@@ -180,7 +215,7 @@
+         ca_key_type=ec:${eck}
+     fi
+ 
+-    openssl req -newkey ${ca_key_type} -passout file:./key_pass.txt \
++    openssl req -newkey ${ca_key_type} -passout file:${KEY_PASS} \
+                    -subj ${ca_subj_req} \
+                    -x509 -extensions v3_ca \
+                    -keyout temp_ca.pem \
+@@ -188,12 +223,12 @@
+                    -days ${val_period} -config ../ca/openssl.cnf
+ 
+     # Generate CA key in PKCS #8 format - both PEM and DER
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform DER -v2 des3 \
+                   -in temp_ca.pem \
+                   -out ${ca_key}.der
+ 
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform PEM -v2 des3 \
+                   -in temp_ca.pem \
+                   -out ${ca_key}.pem
+@@ -222,7 +257,7 @@
+         if [ $use_ecc = 'n' ]
+         then
+             # Generate SRK key
+-            openssl genrsa -des3 -passout file:./key_pass.txt -f4 \
++            openssl genrsa -des3 -passout file:${KEY_PASS} -f4 \
+                            -out ./temp_srk.pem ${kl}
+ 
+             srk_subj_req=/CN=SRK${i}_sha256_${kl}_65537_v3_usr/
+@@ -232,7 +267,7 @@
+             # Generate Elliptic Curve parameters:
+             openssl ecparam -out ./temp_srk.pem -name ${cn} -genkey
+             # Generate SRK key
+-            openssl ec -in ./temp_srk.pem -des3 -passout file:./key_pass.txt \
++            openssl ec -in ./temp_srk.pem -des3 -passout file:${KEY_PASS} \
+                        -out ./temp_srk.pem
+ 
+             srk_subj_req=/CN=SRK${i}_sha256_${cn}_v3_usr/
+@@ -241,13 +276,13 @@
+         fi
+ 
+         # Generate SRK certificate signing request
+-        openssl req -new -batch -passin file:./key_pass.txt \
++        openssl req -new -batch -passin file:${KEY_PASS} \
+                     -subj ${srk_subj_req} \
+                     -key ./temp_srk.pem \
+                     -out ./temp_srk_req.pem
+ 
+         # Generate SRK certificate (this is a CA cert)
+-           openssl ca -batch -passin file:./key_pass.txt \
++           openssl ca -batch -passin file:${KEY_PASS} \
+                       -md sha256 -outdir ./ \
+                       -in ./temp_srk_req.pem \
+                       -cert ${ca_cert}.pem \
+@@ -263,14 +298,14 @@
+                      -out ${srk_crt}.der
+ 
+         # Generate SRK key in PKCS #8 format - both PEM and DER
+-        openssl pkcs8 -passin file:./key_pass.txt \
+-                      -passout file:./key_pass.txt \
++        openssl pkcs8 -passin file:${KEY_PASS} \
++                      -passout file:${KEY_PASS} \
+                       -topk8 -inform PEM -outform DER -v2 des3 \
+                       -in temp_srk.pem \
+                       -out ${srk_key}.der
+ 
+-        openssl pkcs8 -passin file:./key_pass.txt \
+-                      -passout file:./key_pass.txt \
++        openssl pkcs8 -passin file:${KEY_PASS} \
++                      -passout file:${KEY_PASS} \
+                       -topk8 -inform PEM -outform PEM -v2 des3 \
+                       -in temp_srk.pem \
+                       -out ${srk_key}.pem
+@@ -296,7 +331,7 @@
+     if [ $use_ecc = 'n' ]
+         then
+             # Generate SRK key
+-            openssl genrsa -des3 -passout file:./key_pass.txt -f4 \
++            openssl genrsa -des3 -passout file:${KEY_PASS} -f4 \
+                            -out ./temp_srk.pem ${kl}
+ 
+             srk_subj_req=/CN=SRK${i}_sha256_${kl}_65537_v3_ca/
+@@ -306,7 +341,7 @@
+             # Generate Elliptic Curve parameters:
+             openssl ecparam -out ./temp_srk.pem -name ${cn} -genkey
+             # Generate SRK key
+-            openssl ec -in ./temp_srk.pem -des3 -passout file:./key_pass.txt \
++            openssl ec -in ./temp_srk.pem -des3 -passout file:${KEY_PASS} \
+                        -out ./temp_srk.pem
+ 
+             srk_subj_req=/CN=SRK${i}_sha256_${cn}_v3_ca/
+@@ -314,13 +349,13 @@
+             srk_key=./SRK${i}_sha256_${cn}_v3_ca_key
+     fi
+     # Generate SRK certificate signing request
+-       openssl req -new -batch -passin file:./key_pass.txt \
++       openssl req -new -batch -passin file:${KEY_PASS} \
+                    -subj ${srk_subj_req} \
+                    -key ./temp_srk.pem \
+                    -out ./temp_srk_req.pem
+ 
+     # Generate SRK certificate (this is a CA cert)
+-       openssl ca -batch -passin file:./key_pass.txt \
++       openssl ca -batch -passin file:${KEY_PASS} \
+                   -md sha256 -outdir ./ \
+                   -in ./temp_srk_req.pem \
+                   -cert ${ca_cert}.pem \
+@@ -336,14 +371,14 @@
+                  -out ${srk_crt}.der
+ 
+     # Generate SRK key in PKCS #8 format - both PEM and DER
+-    openssl pkcs8 -passin file:./key_pass.txt \
+-                  -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} \
++                  -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform DER -v2 des3 \
+                   -in temp_srk.pem \
+                   -out ${srk_key}.der
+ 
+-    openssl pkcs8 -passin file:./key_pass.txt \
+-                  -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} \
++                  -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform PEM -v2 des3 \
+                   -in temp_srk.pem \
+                   -out ${srk_key}.pem
+@@ -362,7 +397,7 @@
+             srk_crt_i=../crts/SRK${i}_sha256_${kl}_65537_v3_ca_crt.pem
+             srk_key_i=./SRK${i}_sha256_${kl}_65537_v3_ca_key.pem
+             # Generate key
+-            openssl genrsa -des3 -passout file:./key_pass.txt -f4 \
++            openssl genrsa -des3 -passout file:${KEY_PASS} -f4 \
+                            -out ./temp_csf.pem ${kl}
+ 
+             csf_subj_req=/CN=CSF${i}_1_sha256_${kl}_65537_v3_usr/
+@@ -374,7 +409,7 @@
+             # Generate Elliptic Curve parameters:
+             openssl ecparam -out ./temp_csf.pem -name ${cn} -genkey
+             # Generate key
+-            openssl ec -in ./temp_csf.pem -des3 -passout file:./key_pass.txt \
++            openssl ec -in ./temp_csf.pem -des3 -passout file:${KEY_PASS} \
+                        -out ./temp_csf.pem
+ 
+             csf_subj_req=/CN=CSF${i}_1_sha256_${cn}_v3_usr/
+@@ -383,14 +418,14 @@
+     fi
+ 
+     # Generate CSF certificate signing request
+-    openssl req -new -batch -passin file:./key_pass.txt \
++    openssl req -new -batch -passin file:${KEY_PASS} \
+                 -subj ${csf_subj_req} \
+                 -key ./temp_csf.pem \
+                 -out ./temp_csf_req.pem
+ 
+     # Generate CSF certificate (this is a user cert)
+     openssl ca -batch -md sha256 -outdir ./ \
+-               -passin file:./key_pass.txt \
++               -passin file:${KEY_PASS} \
+                -in ./temp_csf_req.pem \
+                -cert ${srk_crt_i} \
+                -keyfile ${srk_key_i} \
+@@ -405,12 +440,12 @@
+                  -out ${csf_crt}.der
+ 
+     # Generate CSF key in PKCS #8 format - both PEM and DER
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform DER -v2 des3 \
+                   -in temp_csf.pem \
+                   -out ${csf_key}.der
+ 
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform PEM -v2 des3 \
+                   -in temp_csf.pem \
+                   -out ${csf_key}.pem
+@@ -427,7 +462,7 @@
+     if [ $use_ecc = 'n' ]
+         then
+             # Generate key
+-            openssl genrsa -des3 -passout file:./key_pass.txt -f4 \
++            openssl genrsa -des3 -passout file:${KEY_PASS} -f4 \
+                            -out ./temp_img.pem ${kl}
+ 
+             img_subj_req=/CN=IMG${i}_1_sha256_${kl}_65537_v3_usr/
+@@ -437,7 +472,7 @@
+             # Generate Elliptic Curve parameters:
+             openssl ecparam -out ./temp_img.pem -name ${cn} -genkey
+             # Generate key
+-            openssl ec -in ./temp_img.pem -des3 -passout file:./key_pass.txt \
++            openssl ec -in ./temp_img.pem -des3 -passout file:${KEY_PASS} \
+                        -out ./temp_img.pem
+ 
+             img_subj_req=/CN=IMG${i}_1_sha256_${cn}_v3_usr/
+@@ -446,13 +481,13 @@
+     fi
+ 
+     # Generate IMG certificate signing request
+-    openssl req -new -batch -passin file:./key_pass.txt \
++    openssl req -new -batch -passin file:${KEY_PASS} \
+                 -subj ${img_subj_req} \
+                 -key ./temp_img.pem \
+                 -out ./temp_img_req.pem
+ 
+     openssl ca -batch -md sha256 -outdir ./ \
+-               -passin file:./key_pass.txt \
++               -passin file:${KEY_PASS} \
+                -in ./temp_img_req.pem \
+                -cert ${srk_crt_i} \
+                -keyfile ${srk_key_i} \
+@@ -467,12 +502,12 @@
+                  -out ${img_crt}.der
+ 
+     # Generate IMG key in PKCS #8 format - both PEM and DER
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform DER -v2 des3 \
+                   -in temp_img.pem \
+                   -out ${img_key}.der
+ 
+-    openssl pkcs8 -passin file:./key_pass.txt -passout file:./key_pass.txt \
++    openssl pkcs8 -passin file:${KEY_PASS} -passout file:${KEY_PASS} \
+                   -topk8 -inform PEM -outform PEM -v2 des3 \
+                   -in temp_img.pem \
+                   -out ${img_key}.pem

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+java -jar /opt/kSar/VER/kSar.jar
+

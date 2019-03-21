@@ -1,0 +1,11 @@
+--- docbook.dcl	2016-04-01 16:14:10.067258516 +0200
++++ docbook.dcl.patched	2016-04-01 16:27:30.786293823 +0200
+@@ -78,7 +78,7 @@
+ 		GRPCNT    253
+ 		GRPGTCNT  253
+ 		LITLEN   8092
+-		NAMELEN    44
++		NAMELEN   256
+ 		TAGLVL    100
+ 
+ FEATURES
