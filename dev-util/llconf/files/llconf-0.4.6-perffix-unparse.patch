@@ -1,0 +1,43 @@
+diff -Nr -U 2 llconf-0.4.6/src/parsers/ini.c llconf-0.4.6_perffix_unparse/src/parsers/ini.c
+--- llconf-0.4.6/src/parsers/ini.c	2007-10-24 20:44:06.000000000 +0200
++++ llconf-0.4.6_perffix_unparse/src/parsers/ini.c	2016-07-15 15:47:46.486509000 +0200
+@@ -293,5 +293,6 @@
+ int unparse_ini(struct cnfmodule *cm, FILE *fptr, struct cnfnode *cn_root)
+ {
+-	struct confline *cl_list = NULL, *cl;
++	int start_parsing = 0;
++	struct confline *cl_list = NULL, *cl, *cl_root;
+ 	struct cnfnode *cn_section;
+ 	char buf[1024];
+@@ -300,10 +301,14 @@
+ 		if(cn_section->name[0] == '.'){
+ 			snprintf(buf, sizeof(buf), "%s\n", cn_section->value);
+-			cl_list = append_confline(cl_list, cl = create_confline(buf));
++			append_confline(cl_list, cl = create_confline(buf));
+ 		}else{
+ 			struct cnfnode *cn_line;
+ 
+ 			snprintf(buf, sizeof(buf), "[%s]\n", cn_section->name);
+-			cl_list = append_confline(cl_list, cl = create_confline(buf));
++			append_confline(cl_list, cl = create_confline(buf));
++			cl_list = cl;
++
++			if (start_parsing++ == 0)
++				cl_root = cl_list;
+ 
+ 			for(cn_line = cn_section->first_child; cn_line; cn_line = cn_line->next){
+@@ -330,8 +335,8 @@
+ 	}
+ 
+-	for(cl = cl_list; cl; cl = cl->next){
++	for(cl = cl_root; cl; cl = cl->next){
+ 		fprintf(fptr, "%s", cl->line);
+ 	}
+-	destroy_confline_list(cl_list);
++	destroy_confline_list(cl_root);
+ 
+ 	return 0;
+@@ -347,3 +352,2 @@
+ 	return clone_cnfmodule(&this_module, NULL, NULL, opt_root);
+ }
+-

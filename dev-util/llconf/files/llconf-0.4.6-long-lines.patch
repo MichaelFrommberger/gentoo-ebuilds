@@ -1,0 +1,197 @@
+diff -Naur llconf-0.4.6/src/lines.c llconf-0.4.6_long_lines/src/lines.c
+--- llconf-0.4.6/src/lines.c	2007-10-24 02:52:11.000000000 +0200
++++ llconf-0.4.6_long_lines/src/lines.c	2016-07-14 16:37:25.500323220 +0200
+@@ -20,7 +20,6 @@
+ */
+ 
+ #include <stdlib.h>
+-#include <stdio.h>
+ #include <string.h>
+ 
+ #include "lines.h"
+diff -Naur llconf-0.4.6/src/lines.h llconf-0.4.6_long_lines/src/lines.h
+--- llconf-0.4.6/src/lines.h	2007-10-24 02:52:32.000000000 +0200
++++ llconf-0.4.6_long_lines/src/lines.h	2016-07-14 16:37:13.132323933 +0200
+@@ -25,8 +25,10 @@
+  * The #confline structure provides for storage of a list of lines of text.
+  */
+ 
++#include <stdio.h>
++
+ /** The maximum length of the text content of a #confline node. */
+-#define MAX_CONFLINE 1024
++#define MAX_CONFLINE 8*1024
+ 
+ /** A linked list representing the lines of text from a configuration file. */
+ struct confline
+diff -Naur llconf-0.4.6/src/parsers/cyconf.c llconf-0.4.6_long_lines/src/parsers/cyconf.c
+--- llconf-0.4.6/src/parsers/cyconf.c	2007-10-24 20:44:06.000000000 +0200
++++ llconf-0.4.6_long_lines/src/parsers/cyconf.c	2016-07-14 17:06:37.491222112 +0200
+@@ -41,7 +41,7 @@
+ static
+ struct confline *_parse_cyconf(struct cnfnode *cn_root, struct confline *cl)
+ {
+-	char buf[1024], *q;
++	char buf[MAX_CONFLINE], *q;
+ 	const char *p;
+ 	struct cnfnode *cn_top;
+ 
+diff -Naur llconf-0.4.6/src/parsers/dhcp_leases.c llconf-0.4.6_long_lines/src/parsers/dhcp_leases.c
+--- llconf-0.4.6/src/parsers/dhcp_leases.c	2007-10-24 20:34:02.000000000 +0200
++++ llconf-0.4.6_long_lines/src/parsers/dhcp_leases.c	2016-07-14 16:50:41.514277282 +0200
+@@ -80,7 +80,7 @@
+ static
+ void _parse_dhcp_leases(struct cnfnode *cn_root, struct confline *cl)
+ {
+-	char buf[1024];
++	char buf[MAX_CONFLINE];
+ 	const char *p;
+ 	struct cnfnode *node = NULL;
+ 	int i;
+diff -Naur llconf-0.4.6/src/parsers/funcexpr.c llconf-0.4.6_long_lines/src/parsers/funcexpr.c
+--- llconf-0.4.6/src/parsers/funcexpr.c	2007-10-24 20:44:06.000000000 +0200
++++ llconf-0.4.6_long_lines/src/parsers/funcexpr.c	2016-07-14 16:42:42.420304930 +0200
+@@ -42,7 +42,7 @@
+ struct cnfnode *parse_funcexpr_b(const char *buffer, const char **pp)
+ {
+ 	struct cnfnode *cn_top = NULL, *cn;
+-	char buf[1024], *q;
++	char buf[MAX_CONFLINE], *q;
+ 	const char *p;
+ 	int is_function = 0;
+ 
+@@ -57,7 +57,7 @@
+ 		qchar[1] = '\0';
+ 
+ 		*q++ = *p++;
+-		while(*p && *p != qchar[0] && q < buf+1021)
++		while(*p && *p != qchar[0] && q < buf + MAX_CONFLINE - 3)
+ 			*q++ = *p++;
+ 		if(*p)
+ 			*q++ = *p++;
+@@ -71,18 +71,18 @@
+ 			*q++ = *p++;
+ 		else
+ 			/* $alphanumericVariableName ;-) */
+-			while((q < buf + 1023) && (*p && (isalnum(*p) || (*p == '_'))))
++			while((q < buf + MAX_CONFLINE - 1) && (*p && (isalnum(*p) || (*p == '_'))))
+ 				*q++ = *p++;
+ 	}else if ((*p == '-') || isdigit(*p)){
+ 		/* Parse a number (integer only) */
+ 		*q++ = *p++;
+-		while((q < buf + 1023) && *p && isdigit(*p))
++		while((q < buf + MAX_CONFLINE - 1) && *p && isdigit(*p))
+ 			*q++ = *p++;
+ 	}else if (isalpha(*p) || (*p == '_')){
+ 		/* Parse a function name. */
+ 		is_function = 1;
+ 		*q++ = *p++;
+-		while((q < buf + 1023) && *p && (isalnum(*p) || (*p == '_')))
++		while((q < buf + MAX_CONFLINE - 1) && *p && (isalnum(*p) || (*p == '_')))
+ 			*q++ = *p++;
+ 	}else
+ 		parse_error_at_expected(buffer, p - buffer, "Quoted string, variable, number or function name", "End of expression");
+diff -Naur llconf-0.4.6/src/parsers/ini.c llconf-0.4.6_long_lines/src/parsers/ini.c
+--- llconf-0.4.6/src/parsers/ini.c	2007-10-24 20:44:06.000000000 +0200
++++ llconf-0.4.6_long_lines/src/parsers/ini.c	2016-07-14 16:32:33.054340097 +0200
+@@ -60,7 +60,7 @@
+ struct confline *parse_ini_subsection(struct confline *cl, struct cnfnode *cn, int cmt_char)
+ {
+ 	const char *p;
+-	char buf[1024];
++	char buf[MAX_CONFLINE];
+   
+ 	for(cl = cl->next; cl; cl = cl->next){
+ 		struct cnfnode *cn_sub;
+@@ -137,7 +137,7 @@
+   
+ 	while(cl){
+ 		const char *p = cl->line;
+-		char buf[1024];
++		char buf[MAX_CONFLINE];
+     
+ 		while(*p && isspace(*p)) p++;
+ 		if(*p){
+@@ -219,7 +219,7 @@
+ 
+ 	for(cl = cl_root; cl;){
+ 		const char *p = cl->line;
+-		char buf[1024];
++		char buf[MAX_CONFLINE];
+ 
+ 		while(*p && isspace(*p)) p++;
+ 		if(*p){
+@@ -256,7 +256,7 @@
+ static
+ struct confline *unparse_ini_subsection(struct cnfnode *cn, struct confline *cl_list, int level)
+ {
+-	char buf[1024], ident[1024];
++	char buf[MAX_CONFLINE], ident[MAX_CONFLINE];
+ 	struct confline *cl;
+ 	struct cnfnode *cn_line;
+ 	int i;
+@@ -294,7 +294,7 @@
+ {
+ 	struct confline *cl_list = NULL, *cl;
+ 	struct cnfnode *cn_section;
+-	char buf[1024];
++	char buf[MAX_CONFLINE];
+ 
+ 	for(cn_section = cn_root->first_child; cn_section; cn_section = cn_section->next){
+ 		if(cn_section->name[0] == '.'){
+diff -Naur llconf-0.4.6/src/parsers/ipsec.c llconf-0.4.6_long_lines/src/parsers/ipsec.c
+--- llconf-0.4.6/src/parsers/ipsec.c	2007-10-24 20:44:07.000000000 +0200
++++ llconf-0.4.6_long_lines/src/parsers/ipsec.c	2016-07-14 16:48:30.907284819 +0200
+@@ -176,7 +176,7 @@
+ {
+ 	struct confline *cl_list = NULL, *cl;
+ 	struct cnfnode *cn_top, *cn;
+-	char buf[1024];
++	char buf[MAX_CONFLINE];
+ 
+ 	for(cn_top = cn_root->first_child; cn_top; cn_top = cn_top->next){
+ 		if(cn_top->name[0] == '.'){
+diff -Naur llconf-0.4.6/src/strutils.c llconf-0.4.6_long_lines/src/strutils.c
+--- llconf-0.4.6/src/strutils.c	2007-10-24 02:55:21.000000000 +0200
++++ llconf-0.4.6_long_lines/src/strutils.c	2016-07-14 16:35:52.809328569 +0200
+@@ -24,11 +24,12 @@
+ #include <stdlib.h>
+ 
+ #include "strutils.h"
++#include "lines.h"
+ 
+ char *dup_next_word(const char **pp)
+ {
+ 	const char *p = *pp;
+-	char *q, tmpbuf[1024];
++	char *q, tmpbuf[MAX_CONFLINE];
+   
+ 	q = tmpbuf;
+ 	while(*p && isspace(*p)) p++; /* eat spaces */
+@@ -56,7 +57,7 @@
+ char *dup_next_quoted(const char **pp, char qchar)
+ {
+ 	const char *p = *pp;
+-	char *q, tmpbuf[1024];
++	char *q, tmpbuf[MAX_CONFLINE];
+   
+ 	q = tmpbuf;
+ 	while(*p && isspace(*p)) p++; /* eat spaces */
+@@ -92,7 +93,7 @@
+ char *dup_next_line(const char **pp)
+ {
+ 	const char *p = *pp;
+-	char *q, tmpbuf[1024];
++	char *q, tmpbuf[MAX_CONFLINE];
+   
+ 	q = tmpbuf;
+ 	while(*p && (*p != '\n') && q < tmpbuf + sizeof(tmpbuf)-1) *q++ = *p++;
+@@ -118,7 +119,7 @@
+ char *dup_line_until(const char **pp, char until)
+ {
+ 	const char *p = *pp;
+-	char *q, tmpbuf[1024];
++	char *q, tmpbuf[MAX_CONFLINE];
+   
+ 	q = tmpbuf;
+ 	while(*p && (*p != '\n') && (*p != until) && q < tmpbuf + sizeof(tmpbuf)-1) *q++ = *p++;

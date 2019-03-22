@@ -1,0 +1,11 @@
+diff -Nur xsddiagram-XSDDiagram_1.1/MainForm.Designer.cs xsddiagram-XSDDiagram_1.1_patched/MainForm.Designer.cs
+--- xsddiagram-XSDDiagram_1.1/MainForm.Designer.cs	2016-07-08 17:21:04.000000000 +0200
++++ xsddiagram-XSDDiagram_1.1_patched/MainForm.Designer.cs	2017-06-26 16:01:25.349599062 +0200
+@@ -15,6 +15,7 @@
+ 		/// </summary>
+ 		private void InitializeComponent()
+ 		{
++            System.Windows.Forms.ToolStripManager.RenderMode = System.Windows.Forms.ToolStripManagerRenderMode.System;
+             this.components = new System.ComponentModel.Container();
+             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+             this.menuStripMain = new System.Windows.Forms.MenuStrip();
