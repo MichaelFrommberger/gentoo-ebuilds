@@ -1,0 +1,60 @@
+--- mxser/driver/Makefile	2014-02-26 06:17:57.000000000 +0100
++++ mxser_irq_patch/driver/Makefile	2016-10-05 17:52:03.346673332 +0200
+@@ -48,25 +48,13 @@
+ PWD	:= $(shell pwd)
+ 
+ module: envchk
+-	@$(MAKE) -s -C $(KDIR) SUBDIRS=$(PWD) modules 2>> build.log \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 0 \
+-	|| echo "Build Fail! Please check build.log for further information" \
+-	&& echo "and send it to support@moxa.com." \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 1
++	@$(MAKE) -s -C $(KDIR) SUBDIRS=$(PWD) modules
+ 
+ module2: envchk 
+-	@$(MAKE) EXTRA_CFLAGS=-DSP2 -s -C $(KDIR) SUBDIRS=$(PWD) modules 2>> build.log \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 0 \
+-	|| echo "Build Fail! Please check build.log for further information" \
+-	&& echo "and send it to support@moxa.com." \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 1
++	@$(MAKE) EXTRA_CFLAGS=-DSP2 -s -C $(KDIR) SUBDIRS=$(PWD) modules 
+ 
+ envchk:
+-	@./mxconf | tee build.log
++	@./mxconf
+ 
+ clean: clean_local
+ 
+@@ -202,25 +190,13 @@
+ 	@if lsmod | grep -q $(TARGET_DRIVER2) ; then rmmod $(TARGET_DRIVER2) ; fi
+ 
+ module : envchk $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c
+-	@$(CC) $(OPTS) $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c \
+-	2>> build.log && cp -f ./build.log ../build.log \
+-	&& exit 0 \
+-	|| echo "Build Fail! Please check build.log for further information" \
+-	&& echo "and send it to support@moxa.com." \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 1
++	@$(CC) $(OPTS) $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c 
+ 	
+ modulesp1 : envchk $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c
+-	@$(CC) $(OPTS) -DSP1 $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c \
+-	2>> build.log && cp -f ./build.log ../build.log \
+-	&& exit 0 \
+-	|| echo "Build Fail! Please check build.log for further information" \
+-	&& echo "and send it to support@moxa.com." \
+-	&& cp -f ./build.log ../build.log \
+-	&& exit 1
++	@$(CC) $(OPTS) -DSP1 $(TARGET_DRIVER1).c $(TARGET_DRIVER2).c 
+ 	
+ envchk:
+-	@./mxconf | tee build.log
++	@./mxconf
+ 
+ dummy:
+ 

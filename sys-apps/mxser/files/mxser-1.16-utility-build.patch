@@ -1,0 +1,163 @@
+diff -Nur mxser/utility/conf/Makefile mxser_irq_patch/utility/conf/Makefile
+--- mxser/utility/conf/Makefile	2014-02-25 14:06:30.000000000 +0100
++++ mxser_irq_patch/utility/conf/Makefile	2016-10-06 12:32:13.338176459 +0200
+@@ -5,7 +5,7 @@
+ all: muestty
+ 
+ install: muestty
+-	@cp -f muestty /usr/bin
++	@mkdir -p ${DESTDIR}/usr/bin && cp -f muestty ${DESTDIR}/usr/bin
+ 
+ muestty: $(FILES)
+ 	@cc $(FILES) -o muestty
+@@ -18,4 +18,4 @@
+ 	@rm -f muestty
+ 
+ uninstall:
+-	@rm -f /usr/bin/muestty
++	@rm -f ${DESTDIR}/usr/bin/muestty
+diff -Nur mxser/utility/diag/Makefile mxser_irq_patch/utility/diag/Makefile
+--- mxser/utility/diag/Makefile	2014-02-25 14:06:30.000000000 +0100
++++ mxser_irq_patch/utility/diag/Makefile	2016-10-06 12:33:15.322688500 +0200
+@@ -4,7 +4,7 @@
+ all:		msdiag
+ 
+ install: msdiag
+-	@cp -p msdiag /usr/bin
++	@mkdir -p ${DESTDIR}/usr/bin && cp -p msdiag ${DESTDIR}/usr/bin
+ 
+ msdiag: 	$(FILES)
+ 	@cc $(FILES) -o msdiag
+@@ -20,4 +20,4 @@
+ 	@rm -f msdiag
+ 
+ uninstall:
+-	@rm -f /usr/bin/msdiag
++	@rm -f ${DESTDIR}/usr/bin/msdiag
+diff -Nur mxser/utility/Makefile mxser_irq_patch/utility/Makefile
+--- mxser/utility/Makefile	2014-02-25 14:06:30.000000000 +0100
++++ mxser_irq_patch/utility/Makefile	2016-10-06 11:22:21.325676840 +0200
+@@ -7,36 +7,36 @@
+ 
+ msdiag:
+ 	cd diag;\
+-	make;
++	${MAKE};
+ 
+ msmon:
+ 	cd mon;\
+-	make;
++	${MAKE};
+ 
+ msterm:
+ 	cd term;\
+-	make;
++	${MAKE};
+ 
+ msestty:
+ 	cd conf;\
+-	make;
++	${MAKE};
+ 
+ 
+ diag_install:
+ 	cd diag;\
+-	make install
++	${MAKE} install
+ 
+ mon_install:
+ 	cd mon;\
+-	make install
++	${MAKE} install
+ 
+ term_install:
+ 	cd term;\
+-	make install
++	${MAKE} install
+ 
+ estty_install:
+ 	cd conf;\
+-	make install;
++	${MAKE} install;
+ 
+ 
+ 
+@@ -47,34 +47,34 @@
+ 
+ diag_clean:
+ 	cd diag;\
+-	make clean
++	${MAKE} clean
+ 
+ mon_clean:
+ 	cd mon;\
+-	make clean
++	${MAKE} clean
+ 
+ term_clean:
+ 	cd term;\
+-	make clean
++	${MAKE} clean
+ 
+ estty_clean:
+ 	cd conf;\
+-	make clean
++	${MAKE} clean
+ 
+ uninstall: diag_uninstall mon_uninstall term_uninstall estty_uninstall
+ 
+ diag_uninstall:
+ 	cd diag;\
+-	make uninstall
++	${MAKE} uninstall
+ 
+ mon_uninstall:
+ 	cd mon;\
+-	make uninstall
++	${MAKE} uninstall
+ 
+ term_uninstall:
+ 	cd term;\
+-	make uninstall
++	${MAKE} uninstall
+ 
+ estty_uninstall:
+ 	cd conf;\
+-	make uninstall
++	${MAKE} uninstall
+diff -Nur mxser/utility/mon/Makefile mxser_irq_patch/utility/mon/Makefile
+--- mxser/utility/mon/Makefile	2014-02-25 14:06:30.000000000 +0100
++++ mxser_irq_patch/utility/mon/Makefile	2016-10-06 12:33:04.969800232 +0200
+@@ -12,7 +12,7 @@
+ all:		msmon
+ 
+ install: msmon
+-	@cp -p msmon /usr/bin
++	@mkdir -p ${DESTDIR}/usr/bin && cp -p msmon ${DESTDIR}/usr/bin
+ 
+ msmon: 	$(FILES)
+ 	@cc $(FILES) -o msmon
+@@ -33,4 +33,4 @@
+ 	@rm -f msmon
+ 
+ uninstall:
+-	@rm -f /usr/bin/msmon
++	@rm -f ${DESTDIR}/usr/bin/msmon
+diff -Nur mxser/utility/term/Makefile mxser_irq_patch/utility/term/Makefile
+--- mxser/utility/term/Makefile	2014-02-25 14:06:30.000000000 +0100
++++ mxser_irq_patch/utility/term/Makefile	2016-10-06 12:32:51.146946697 +0200
+@@ -12,7 +12,7 @@
+ all:		msterm
+ 
+ install: msterm
+-	@cp -p msterm /usr/bin
++	@mkdir -p ${DESTDIR}/usr/bin && cp -p msterm ${DESTDIR}/usr/bin
+ 
+ msterm:	$(FILES)
+ 	@cc $(FILES) -o msterm
+@@ -44,4 +44,4 @@
+ 	@rm -f msterm
+ 
+ uninstall:
+-	@rm -f /usr/bin/msterm
++	@rm -f ${DESTDIR}/usr/bin/msterm

@@ -1,0 +1,28 @@
+diff -Nur mxser/driver/mxpcie.h mxser_irq_patch/driver/mxpcie.h
+--- mxser/driver/mxpcie.h	2014-02-26 03:53:56.000000000 +0100
++++ mxser_irq_patch/driver/mxpcie.h	2016-09-29 15:08:13.650980746 +0200
+@@ -48,6 +48,10 @@
+ #define UART_MCR_AFE		0x20
+ #define UART_LSR_SPECIAL	0x1E
+ 
++#if !defined(IRQF_DISABLED)
++#define IRQF_DISABLED 0x00
++#endif
++
+ #define MX_LOCK_INIT()		unsigned long sp_flags=0
+ #if 0 
+ #define MX_LOCK(lock)		{\
+diff -Nur mxser/driver/mxser.c mxser_irq_patch/driver/mxser.c
+--- mxser/driver/mxser.c	2014-02-26 05:00:53.000000000 +0100
++++ mxser_irq_patch/driver/mxser.c	2016-09-29 15:06:56.445511698 +0200
+@@ -125,6 +125,10 @@
+ #define UART_MCR_AFE		0x20
+ #define UART_LSR_SPECIAL	0x1E
+ 
++#if !defined(IRQF_DISABLED)
++#define IRQF_DISABLED 0x00
++#endif
++
+ #define MX_LOCK_INIT()		unsigned long sp_flags=0
+ #if 0 
+ #define MX_LOCK(lock)		{\

@@ -1,0 +1,5 @@
+# Moxa Smartio/Industio cards udev rules
+#
+# adds statistcs device nodes mxupci or mxser 
+ACTION=="add", SUBSYSTEM=="tty", ENV{MAJOR}=="31", ENV{MINOR}=="32", SYMLINK+="mxupcie"
+ACTION=="add", SUBSYSTEM=="tty", ENV{MAJOR}=="30", ENV{MINOR}=="32", SYMLINK+="mxser"

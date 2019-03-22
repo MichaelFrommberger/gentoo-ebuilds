@@ -1,0 +1,47 @@
+diff -Nur mxser/utility/conf/conftool.c mxser_implicit_func/utility/conf/conftool.c
+--- mxser/utility/conf/conftool.c	2014-03-03 09:51:38.000000000 +0100
++++ mxser_implicit_func/utility/conf/conftool.c	2017-06-08 14:45:26.042414094 +0200
+@@ -33,6 +33,7 @@
+ #include	"cpld_param.h"
+ #include 	<termios.h>
+ #include 	<linux/version.h>
++#include  <sys/ioctl.h>
+ #define VERSION_CODE(ver,rel,seq)   ((ver << 16) | (rel << 8) | seq)
+ #define MX_IOCTL_CODE		0x400
+ #define MOXA			MX_IOCTL_CODE
+diff -Nur mxser/utility/diag/diag.c mxser_implicit_func/utility/diag/diag.c
+--- mxser/utility/diag/diag.c	2014-02-26 10:06:52.000000000 +0100
++++ mxser_implicit_func/utility/diag/diag.c	2017-06-08 14:30:28.370178864 +0200
+@@ -21,6 +21,9 @@
+ #include <stdio.h>
+ #include <fcntl.h>
+ #include <errno.h>
++#include <unistd.h>
++
++#include <sys/ioctl.h>
+ 
+ char DIAG_VER[] = "1.4";
+ #include "../global.h"
+diff -Nur mxser/utility/mon/mon_pa.c mxser_implicit_func/utility/mon/mon_pa.c
+--- mxser/utility/mon/mon_pa.c	2014-02-25 14:06:30.000000000 +0100
++++ mxser_implicit_func/utility/mon/mon_pa.c	2017-06-08 14:38:08.397860930 +0200
+@@ -22,7 +22,7 @@
+ #include	<fcntl.h>
+ #include	<linux/types.h>
+ #include	<time.h>
+-//#include        <sys/ioctl.h>
++#include  <sys/ioctl.h>
+ 
+ #include	"../mxwinlib/win.h"
+ #include	"../mxlib/declare.h"
+diff -Nur mxser/utility/mon/mon_p.c mxser_implicit_func/utility/mon/mon_p.c
+--- mxser/utility/mon/mon_p.c	2014-02-26 09:33:36.000000000 +0100
++++ mxser_implicit_func/utility/mon/mon_p.c	2017-06-08 14:38:48.900531534 +0200
+@@ -25,6 +25,7 @@
+ #include	<string.h>
+ #include	<stdlib.h>
+ #include	<errno.h>
++#include  <sys/ioctl.h>
+ #include	"../mxwinlib/win.h"
+ #include	"../mxlib/declare.h"
+ #include	"../global.h"
