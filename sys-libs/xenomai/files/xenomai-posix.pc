@@ -1,0 +1,10 @@
+prefix=${prefix}/bin
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: xenomai-posix
+Description: Xenomai is a real-time development framework cooperating with the Linux kernel
+Version: @PV@
+URL: http://www.xenomai.org
+Libs: @xeno_ldflags@
+Cflags: @xeno_cflags@

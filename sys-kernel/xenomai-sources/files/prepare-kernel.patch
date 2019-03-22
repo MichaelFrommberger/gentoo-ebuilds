@@ -1,0 +1,19 @@
+*** xenomai-2.5.6/scripts/prepare-kernel.sh	Wed Feb 16 15:26:01 2011
+--- xenomai-2.5.6/scripts/prepare-kernel.sh	Tue Jun 21 14:05:13 2011
+***************
+*** 118,124 ****
+                  if test x$forcelink = x1 -o \
+  		   ! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f;
+  		then
+!                     ln -sf $xenomai_root/$target_dir/$f $linux_tree/$link_dir/$f
+                  fi
+              else
+                  if test `check_filter $link_dir/$f` = "ok"; then
+--- 118,124 ----
+                  if test x$forcelink = x1 -o \
+  		   ! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f;
+  		then
+! 		    cp $xenomai_root/$target_dir/$f $linux_tree/$link_dir/$f
+                  fi
+              else
+                  if test `check_filter $link_dir/$f` = "ok"; then
